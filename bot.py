@@ -15,8 +15,7 @@ from telegram.ext import (
 )
 
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 logger = logging.getLogger(__name__)
@@ -29,9 +28,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     sending a welcome message along with the user's chat ID.
     """
     chat_id = update.message.chat_id
-    await update.message.reply_text(f"🙏Ласкаво просимо!"
-                                    "Використовуйте /filter_by_city для сортування резюме за сайтом.\n"
-                                    "Використовуйте /filter_by_site для сортування резюме за містами.")
+    await update.message.reply_text(
+        f"🙏Ласкаво просимо!"
+        "Використовуйте /filter_by_city для сортування резюме за сайтом.\n"
+        "Використовуйте /filter_by_site для сортування резюме за містами."
+    )
 
 
 def format_resume(row):
@@ -51,17 +52,22 @@ def format_resume(row):
     )
 
 
-async def send_resumes(update: Update, context: ContextTypes.DEFAULT_TYPE, filter_by: str = None, filter_value: str = None) -> None:
+async def send_resumes(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    filter_by: str = None,
+    filter_value: str = None,
+) -> None:
     """
     Sends resumes filtered by a specified field and value.
     """
     try:
-        df = pd.read_csv('result_df.csv')
+        df = pd.read_csv("result_df.csv")
         if filter_by and filter_value:
             df = df[df[filter_by].str.contains(filter_value, case=False, na=False)]
         top_5_rows = df.head()
         message = "\n\n".join([format_resume(row) for _, row in top_5_rows.iterrows()])
-        await update.message.reply_text(f"<pre>{message}</pre>", parse_mode='HTML')
+        await update.message.reply_text(f"<pre>{message}</pre>", parse_mode="HTML")
     except Exception as e:
         logger.error(f"Помилка під час надсилання резюме: {e}")
         await update.message.reply_text("Сталася помилка під час надсилання резюме.")
@@ -88,7 +94,7 @@ async def city_filter_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     Handles the user input for city filter.
     """
     city = update.message.text
-    await send_resumes(update, context, filter_by='cities', filter_value=city)
+    await send_resumes(update, context, filter_by="cities", filter_value=city)
     return ConversationHandler.END
 
 
@@ -97,7 +103,7 @@ async def site_filter_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     Handles the user input for site filter.
     """
     site = update.message.text
-    await send_resumes(update, context, filter_by='site', filter_value=site)
+    await send_resumes(update, context, filter_by="site", filter_value=site)
     return ConversationHandler.END
 
 
@@ -110,17 +116,21 @@ def main() -> None:
     app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
 
     filter_city_conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('filter_by_city', filter_by_city)],
+        entry_points=[CommandHandler("filter_by_city", filter_by_city)],
         states={
-            FILTER_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, city_filter_input)],
+            FILTER_CITY: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, city_filter_input)
+            ],
         },
         fallbacks=[],
     )
 
     filter_site_conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('filter_by_site', filter_by_site)],
+        entry_points=[CommandHandler("filter_by_site", filter_by_site)],
         states={
-            FILTER_SITE: [MessageHandler(filters.TEXT & ~filters.COMMAND, site_filter_input)],
+            FILTER_SITE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, site_filter_input)
+            ],
         },
         fallbacks=[],
     )
@@ -134,5 +144,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     load_dotenv()
-    TG_BOT_TOKEN = os.getenv('TG_TOKEN')
+    TG_BOT_TOKEN = os.getenv("TG_TOKEN")
     main()

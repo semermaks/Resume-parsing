@@ -7,9 +7,7 @@ from resume_parser.spiders.basic import Basic
 class WorkUaSpider(Basic):
     name = "work_ua"
     allowed_domains = ["work.ua"]
-    start_urls = [
-        "https://www.work.ua/resumes-data+scientist/"
-    ]
+    start_urls = ["https://www.work.ua/resumes-data+scientist/"]
 
     def parse(self, response: Response, **kwargs):
         for resume in response.css("div.card-search"):
@@ -18,10 +16,10 @@ class WorkUaSpider(Basic):
                 if len(arr) == 2:
                     years = None
                     cities = arr[1]
-                elif arr[1][0:2] == '\n ' and len(arr) == 6:
+                elif arr[1][0:2] == "\n " and len(arr) == 6:
                     years = int(arr[4][0:2])
                     cities = arr[5]
-                elif arr[1][0:2] == '\n ' and len(arr) == 5:
+                elif arr[1][0:2] == "\n " and len(arr) == 5:
                     years = None
                     cities = arr[4]
                 else:
@@ -31,7 +29,10 @@ class WorkUaSpider(Basic):
                 salary = self.extract_salary(salary)
                 info = resume.css("p.mb-0.overflow.wordwrap::text").get()
                 if info is None:
-                    info = self.clean_text("".join(resume.css("ul.mt-lg.mb-0 li::text").getall()) + "".join(resume.css("ul.mt-lg.mb-0 li span::text").getall()))
+                    info = self.clean_text(
+                        "".join(resume.css("ul.mt-lg.mb-0 li::text").getall())
+                        + "".join(resume.css("ul.mt-lg.mb-0 li span::text").getall())
+                    )
                 # tech_found = self.descriptions(response.urljoin(resume.css("h2.mt-0 a::attr(href)").get()))
                 yield {
                     "job": resume.css("h2.mt-0 a::text").get(),
