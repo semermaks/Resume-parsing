@@ -31,13 +31,13 @@ class Basic(scrapy.Spider):
 
     @staticmethod
     def get_exchange_rate():
-        api_key = os.getenv('API_KEY')
+        api_key = os.getenv("API_KEY")
         if not api_key:
             raise ValueError("API key not found in environment variables")
         url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/USD"
         response = requests.get(url)
         data = response.json()
-        return data['conversion_rates']['UAH']
+        return data["conversion_rates"]["UAH"]
 
     @staticmethod
     def extract_salary(text):
@@ -45,20 +45,22 @@ class Basic(scrapy.Spider):
             multiply = False
             if "$" in text:
                 multiply = True
-            cleaned_text = text.strip().replace('\xa0', ' ')
-            pattern = r'\d+\s?\d+\s?'
+            cleaned_text = text.strip().replace("\xa0", " ")
+            pattern = r"\d+\s?\d+\s?"
             match = re.search(pattern, cleaned_text)
             if match and not multiply:
-                return int(match.group(0).replace(' ', ''))
+                return int(match.group(0).replace(" ", ""))
             elif match:
-                return round(int(match.group(0).replace(' ', '')) * Basic.get_exchange_rate(), 0)
+                return round(
+                    int(match.group(0).replace(" ", "")) * Basic.get_exchange_rate(), 0
+                )
         return None
 
     @staticmethod
     def clean_text(text):
         if text:
-            text = re.sub(r',.*', '', text)
-            text = text.replace('\xa0', ' ').strip()
+            text = re.sub(r",.*", "", text)
+            text = text.replace("\xa0", " ").strip()
         return text
 
     def descriptions(self, job_url):
